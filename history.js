@@ -3,16 +3,23 @@
 const demoStore = window.KadenohDemoStore;
 const storageKeys = demoStore.keys;
 const payoutMethods = demoStore.payoutMethods;
+const minimumWithdrawalAmount = demoStore.minimumWithdrawalAmount;
+const demoCreditAmount = demoStore.demoCreditAmount;
 const historyRows = document.querySelector("#history-rows");
 const withdrawalForm = document.querySelector("#withdrawal-form");
 const withdrawalAmount = document.querySelector("#withdrawal-amount");
 const withdrawalMethod = document.querySelector("#withdrawal-method");
+const demoCreditPanel = document.querySelector("#demo-credit-panel");
+const addDemoCreditButton = document.querySelector("#add-demo-credit");
+const withdrawalConfirmation = document.querySelector("#withdrawal-confirmation");
+const confirmationStatus = document.querySelector("#withdrawal-confirmation-status");
 const themeToggle = document.querySelector("#theme-toggle");
 let campaigns = demoStore.loadCampaigns();
 let progress = {};
 let history = [];
 let activeFilter = "all";
 let loadFailed = false;
+let pendingWithdrawal = null;
 
 function setStatus(message) {
   document.querySelector("#withdrawal-status").textContent = message;
@@ -83,6 +90,7 @@ function renderSummary() {
   document.querySelector("#history-withdrawn").textContent = formatCurrency(withdrawn);
   document.querySelector("#history-count").textContent = String(history.length);
   document.querySelector("#withdrawal-available").textContent = `Available: ${formatCurrency(balance)}`;
+  withdrawalAmount.min = minimumWithdrawalAmount.toFixed(2);
   withdrawalAmount.max = balance.toFixed(2);
 }
 
@@ -103,17 +111,17 @@ function renderMethodOptions() {
   }
 
   const hasMethod = progress.methods.length > 0;
-  const enoughBalance = getAvailableBalance() >= 0.01;
+  const enoughBalance = getAvailableBalance() >= minimumWithdrawalAmount;
   withdrawalMethod.disabled = !hasMethod || loadFailed;
   withdrawalAmount.disabled = !hasMethod || !enoughBalance || loadFailed;
   document.querySelector("#request-withdrawal").disabled = !hasMethod || !enoughBalance || loadFailed;
   document.querySelector("#withdrawal-method-help").hidden = hasMethod;
   if (!hasMethod) {
     document.querySelector("#withdrawal-method-help").textContent =
-      "Add a payout method on the dashboard before making a demo request.";
+      `Add a demo payout provider on the dashboard. At least ${formatCurrency(minimumWithdrawalAmount)} must be available to request a withdrawal.`;
   } else if (!enoughBalance) {
     document.querySelector("#withdrawal-method-help").textContent =
-      "Earn demo rewards before requesting a withdrawal.";
+      `Earn at least ${formatCurrency(minimumWithdrawalAmount)} in demo rewards before requesting a withdrawal.`;
     document.querySelector("#withdrawal-method-help").hidden = false;
   } else {
     document.querySelector("#withdrawal-method-help").hidden = true;
@@ -134,6 +142,14 @@ function describeEvent(event) {
     return {
       title: "Referral reward",
       type: "Referral",
+      amount: `+${formatCurrency(event.amount)}`,
+      amountClass: "is-credit",
+    };
+  }
+  if (event.type === "demo_credit") {
+    return {
+      title: "One-time demo credit",
+      type: "Demo credit",
       amount: `+${formatCurrency(event.amount)}`,
       amountClass: "is-credit",
     };
@@ -167,6 +183,7 @@ function formatEventDate(createdAt) {
 function matchesFilter(event) {
   if (activeFilter === "rewards") return event.type === "campaign_reward" || event.type === "referral_reward";
   if (activeFilter === "withdrawals") return event.type === "withdrawal";
+  if (activeFilter === "credits") return event.type === "demo_credit";
   if (activeFilter === "account") return event.type === "payout_method_added" || event.type === "payout_method_removed";
   return true;
 }
@@ -181,7 +198,7 @@ function renderHistoryRows() {
     cell.className = "history-empty";
     cell.textContent = history.length
       ? "No entries in this category yet."
-      : "No history yet. Complete a campaign or simulate a referral to see activity here.";
+      : "No history yet. Complete a campaign, add a demo payout provider, or simulate a referral to see activity here.";
     row.appendChild(cell);
     historyRows.appendChild(row);
     return;
@@ -211,11 +228,45 @@ function renderHistoryRows() {
 function renderPage() {
   renderSummary();
   renderMethodOptions();
+  renderDemoCredit();
   renderHistoryRows();
+}
+
+function renderDemoCredit() {
+  const alreadyUsed = history.some((event) => event.type === "demo_credit");
+  demoCreditPanel.hidden =
+    loadFailed || alreadyUsed || getAvailableBalance() >= minimumWithdrawalAmount;
 }
 
 withdrawalAmount.addEventListener("input", () => withdrawalAmount.setCustomValidity(""));
 withdrawalMethod.addEventListener("change", () => withdrawalMethod.setCustomValidity(""));
+
+addDemoCreditButton.addEventListener("click", () => {
+  if (loadFailed || history.some((event) => event.type === "demo_credit")) return;
+
+  const createdAt = Date.now();
+  const credit = {
+    id: `demo-credit-${createdAt}`,
+    type: "demo_credit",
+    amount: demoCreditAmount,
+    createdAt,
+    status: "Added (demo)",
+  };
+  const nextProgress = {
+    ...progress,
+    history: [credit, ...history],
+  };
+  try {
+    localStorage.setItem(storageKeys.progress, JSON.stringify(nextProgress));
+    progress = nextProgress;
+    history = nextProgress.history;
+    renderPage();
+    setStatus(`One-time ${formatCurrency(demoCreditAmount)} demo credit added. It is not real money.`);
+  } catch (error) {
+    console.warn("Could not save the demo credit.", error);
+    setStatus("Could not add the demo credit. Check browser storage and try again.");
+  }
+});
 
 withdrawalForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -224,8 +275,10 @@ withdrawalForm.addEventListener("submit", (event) => {
   const amount = Math.round(Number(withdrawalAmount.value) * 100) / 100;
   const methodId = withdrawalMethod.value;
   const available = getAvailableBalance();
-  if (!Number.isFinite(amount) || amount <= 0 || amount > available) {
-    withdrawalAmount.setCustomValidity(`Enter an amount between $0.01 and ${formatCurrency(available)}.`);
+  if (!Number.isFinite(amount) || amount < minimumWithdrawalAmount || amount > available) {
+    withdrawalAmount.setCustomValidity(
+      `Enter an amount between ${formatCurrency(minimumWithdrawalAmount)} and ${formatCurrency(available)}.`,
+    );
     withdrawalAmount.reportValidity();
     return;
   }
@@ -235,9 +288,53 @@ withdrawalForm.addEventListener("submit", (event) => {
     return;
   }
 
+  pendingWithdrawal = { amount, methodId };
+  confirmationStatus.textContent = "";
+  document.querySelector("#withdrawal-review-amount").textContent = formatCurrency(amount);
+  document.querySelector("#withdrawal-review-method").textContent =
+    payoutMethods.find((method) => method.id === methodId).name;
+  document.querySelector("#withdrawal-review-remaining").textContent =
+    formatCurrency(Math.round((available - amount) * 100) / 100);
+  withdrawalConfirmation.showModal();
+});
+
+document.querySelector("#cancel-withdrawal").addEventListener("click", () => {
+  withdrawalConfirmation.close();
+});
+
+withdrawalConfirmation.addEventListener("close", () => {
+  pendingWithdrawal = null;
+});
+
+document.querySelector("#confirm-withdrawal").addEventListener("click", () => {
+  if (!pendingWithdrawal) {
+    withdrawalConfirmation.close();
+    return;
+  }
+
+  const { amount, methodId } = pendingWithdrawal;
+  const available = getAvailableBalance();
+  if (
+    amount < minimumWithdrawalAmount ||
+    amount > available ||
+    !progress.methods.includes(methodId) ||
+    loadFailed
+  ) {
+    withdrawalConfirmation.close();
+    setStatus(
+      amount < minimumWithdrawalAmount
+        ? `The minimum demo withdrawal is ${formatCurrency(minimumWithdrawalAmount)}.`
+        : amount > available
+          ? "Your demo balance changed. Review the amount and try again."
+          : "That payout provider is no longer available. Choose another provider and try again.",
+    );
+    renderPage();
+    return;
+  }
+
   const createdAt = Date.now();
   const withdrawal = {
-    id: `withdrawal-${createdAt}`,
+    id: `withdrawal-${createdAt}-${history.length}`,
     type: "withdrawal",
     amount,
     methodId,
@@ -252,12 +349,14 @@ withdrawalForm.addEventListener("submit", (event) => {
     localStorage.setItem(storageKeys.progress, JSON.stringify(nextProgress));
     progress = nextProgress;
     history = nextProgress.history;
+    pendingWithdrawal = null;
+    withdrawalConfirmation.close();
     withdrawalForm.reset();
-    setStatus("Demo withdrawal request recorded. No money was transferred.");
     renderPage();
+    setStatus("Demo request recorded and balance reserved. No money was transferred.");
   } catch (error) {
     console.warn("Could not save the demo withdrawal request.", error);
-    setStatus("Could not save the request. Check browser storage and try again.");
+    confirmationStatus.textContent = "Could not save the request. Check browser storage and try again.";
   }
 });
 

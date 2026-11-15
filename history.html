@@ -91,7 +91,7 @@
         </article>
       </section>
 
-      <section class="history-panel withdrawal-panel" aria-labelledby="withdrawal-title">
+      <section id="withdrawal-panel" class="history-panel withdrawal-panel" aria-labelledby="withdrawal-title">
         <div class="history-section-heading">
           <div>
             <p class="eyebrow">SIMULATED PAYOUT</p>
@@ -102,35 +102,85 @@
           </span>
         </div>
         <p class="history-help">
-          A request is recorded here and deducted from your available demo
-          balance. No payout details are collected or sent.
+          Minimum withdrawal: $15.00. Review your request before confirming.
+          The amount is reserved from your demo balance; no payout is sent.
         </p>
         <form class="withdrawal-form" id="withdrawal-form">
-          <label for="withdrawal-amount">Amount ($)</label>
-          <input
-            id="withdrawal-amount"
-            name="amount"
-            type="number"
-            min="0.01"
-            step="0.01"
-            required
-            inputmode="decimal"
-            placeholder="0.00"
-          />
-          <label for="withdrawal-method">Saved demo method</label>
-          <select id="withdrawal-method" name="method" required>
-            <option value="">Select a payout method</option>
-          </select>
+          <label for="withdrawal-amount">
+            Amount ($)
+            <input
+              id="withdrawal-amount"
+              name="amount"
+              type="number"
+              min="15.00"
+              step="0.01"
+              required
+              inputmode="decimal"
+              placeholder="15.00"
+            />
+          </label>
+          <label for="withdrawal-method">
+            Demo payout provider
+            <select id="withdrawal-method" name="method" required>
+              <option value="">Select a payout provider</option>
+            </select>
+          </label>
           <button class="primary-button" id="request-withdrawal" type="submit">
-            Simulate withdrawal
+            Review request
           </button>
         </form>
+        <aside class="demo-credit-panel" id="demo-credit-panel" hidden>
+          <div>
+            <strong>Want to try the withdrawal flow?</strong>
+            <p>Add a one-time $15 demo credit. It is test-only and is not real money.</p>
+          </div>
+          <button class="method-button" id="add-demo-credit" type="button">
+            Add $15 demo credit
+          </button>
+        </aside>
         <p class="history-method-help" id="withdrawal-method-help">
-          Add a payout method on the <a href="index.html#payout-title">dashboard</a>
-          before making a demo request.
+          Add a demo payout provider on the
+          <a href="index.html#payout-title">dashboard</a> before making a request.
         </p>
         <p class="history-status" id="withdrawal-status" role="status" aria-live="polite"></p>
       </section>
+
+      <dialog
+        class="withdrawal-dialog"
+        id="withdrawal-confirmation"
+        aria-labelledby="withdrawal-confirmation-title"
+        aria-describedby="withdrawal-confirmation-note"
+      >
+        <p class="eyebrow">CHECK REQUEST</p>
+        <h2 id="withdrawal-confirmation-title">Confirm demo withdrawal</h2>
+        <dl class="withdrawal-review">
+          <div>
+            <dt>Amount</dt>
+            <dd id="withdrawal-review-amount">$0.00</dd>
+          </div>
+          <div>
+            <dt>Provider</dt>
+            <dd id="withdrawal-review-method">—</dd>
+          </div>
+          <div>
+            <dt>Demo balance after request</dt>
+            <dd id="withdrawal-review-remaining">$0.00</dd>
+          </div>
+        </dl>
+        <p class="withdrawal-confirmation-note" id="withdrawal-confirmation-note">
+          This records a demo request and reserves demo rewards in this browser.
+          No money or account details are sent.
+        </p>
+        <p class="withdrawal-confirmation-status" id="withdrawal-confirmation-status" role="status" aria-live="polite"></p>
+        <div class="withdrawal-dialog-actions">
+          <button class="method-button" id="cancel-withdrawal" type="button">
+            Back
+          </button>
+          <button class="primary-button" id="confirm-withdrawal" type="button">
+            Confirm demo request
+          </button>
+        </div>
+      </dialog>
 
       <section class="history-panel" aria-labelledby="history-table-title">
         <div class="history-section-heading history-table-heading">
@@ -149,6 +199,9 @@
           </button>
           <button class="history-filter" type="button" data-filter="withdrawals">
             Withdrawals
+          </button>
+          <button class="history-filter" type="button" data-filter="credits">
+            Demo credits
           </button>
           <button class="history-filter" type="button" data-filter="account">
             Payout activity

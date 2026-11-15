@@ -150,6 +150,111 @@
   opacity: 0.55;
 }
 
+.demo-credit-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.demo-credit-panel[hidden] {
+  display: none;
+}
+
+.demo-credit-panel strong {
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.demo-credit-panel p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.withdrawal-dialog {
+  width: min(440px, calc(100vw - 32px));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgba(20, 32, 23, 0.2);
+}
+
+.withdrawal-dialog::backdrop {
+  background: rgba(15, 23, 17, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.withdrawal-dialog h2 {
+  margin: 0 0 17px;
+  font: 700 22px "Space Grotesk", sans-serif;
+}
+
+.withdrawal-review {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 12px;
+}
+
+.withdrawal-review > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.withdrawal-review > div:last-child {
+  border-bottom: 0;
+}
+
+.withdrawal-review dt {
+  color: var(--muted);
+}
+
+.withdrawal-review dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 700;
+  text-align: right;
+}
+
+.withdrawal-confirmation-note,
+.withdrawal-confirmation-status {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.withdrawal-confirmation-note {
+  margin: 14px 0 0;
+}
+
+.withdrawal-confirmation-status {
+  min-height: 16px;
+  margin: 6px 0 0;
+  color: #a64b44;
+}
+
+.withdrawal-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 .history-method-help,
 .history-status {
   margin: 10px 0 0;
@@ -265,6 +370,10 @@ html[data-theme="dark"] .history-table .is-debit {
   color: #ef9b91;
 }
 
+html[data-theme="dark"] .withdrawal-confirmation-status {
+  color: #ef9b91;
+}
+
 @media (max-width: 760px) {
   .history-main {
     padding: 36px 20px 46px;
@@ -303,6 +412,15 @@ html[data-theme="dark"] .history-table .is-debit {
 
   .withdrawal-form {
     grid-template-columns: 1fr;
+  }
+
+  .withdrawal-dialog {
+    padding: 20px;
+  }
+
+  .demo-credit-panel {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .withdrawal-form button {

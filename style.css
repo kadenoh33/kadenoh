@@ -664,63 +664,15 @@ h1 span {
   background: #fff;
   color: #818a83;
 }
-.payout-entry-form {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 7px;
-  padding-top: 3px;
-}
-.payout-entry-form label {
-  grid-column: 1 / -1;
-  color: #667168;
-  font-size: 10px;
-  font-weight: 600;
-}
-.payout-entry-form input {
-  width: 100%;
-  min-width: 0;
-  border: 1px solid #e4e9e4;
-  border-radius: 6px;
-  padding: 8px 9px;
-  outline: none;
-  color: var(--ink);
-  background: white;
-  font:
-    11px "Inter",
-    sans-serif;
-}
-.payout-entry-form input:focus {
-  border-color: #8db598;
-  box-shadow: 0 0 0 3px #8db59824;
-}
-.payout-entry-form input::placeholder {
-  color: #a7afa8;
-}
-.detail-save-button {
-  border: 0;
-  border-radius: 6px;
-  padding: 8px 9px;
-  background: #edf4ed;
-  color: var(--green);
-  font-size: 9px;
-  font-weight: 700;
-}
-.detail-save-button:hover {
-  background: #e2eee3;
-}
-.payout-feedback {
-  grid-column: 1 / -1;
-  min-height: 12px;
-  color: #748a77;
-  font-size: 9px;
-  line-height: 1.4;
-}
 .payout-disclaimer {
   margin: 11px 0 0;
   color: #9aa29b;
   font-size: 9px;
   line-height: 1.5;
+}
+.payout-withdrawal-link {
+  display: inline-flex;
+  margin-top: 14px;
 }
 .section-heading,
 .activity-heading {
@@ -1658,7 +1610,6 @@ html[data-theme="dark"] .activity-card,
 html[data-theme="dark"] .payout-section,
 html[data-theme="dark"] .payout-method,
 html[data-theme="dark"] .profile-photo-preview,
-html[data-theme="dark"] .payout-entry-form input,
 html[data-theme="dark"] .referral-link-input,
 html[data-theme="dark"] .photo-remove-button {
   border-color: var(--border);
@@ -1718,20 +1669,6 @@ html[data-theme="dark"] .photo-remove-button {
   border-color: var(--border);
   background: #202a23;
   color: #c0cbc2;
-}
-html[data-theme="dark"] .payout-entry-form label {
-  color: #b6c2b9;
-}
-html[data-theme="dark"] .payout-entry-form input {
-  background: #151c17;
-  color: var(--ink);
-}
-html[data-theme="dark"] .detail-save-button {
-  background: #2b4433;
-  color: #a7d8b0;
-}
-html[data-theme="dark"] .detail-save-button:hover {
-  background: #34533e;
 }
 html[data-theme="dark"] .filter-chip {
   border-color: var(--border);
@@ -1794,8 +1731,7 @@ html[data-theme="dark"] .profile-field input::placeholder {
   color: #78867b;
 }
 html[data-theme="dark"] .profile-info-status,
-html[data-theme="dark"] .profile-photo-status,
-html[data-theme="dark"] .payout-feedback {
+html[data-theme="dark"] .profile-photo-status {
   color: #a6d1ad;
 }
 html[data-theme="dark"] .photo-remove-button:disabled {

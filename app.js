@@ -60,11 +60,13 @@ function loadState() {
   }
 }
 
-function saveState() {
+function saveState(nextState = state) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+    return true;
   } catch (error) {
     console.warn("Could not save demo progress to local storage.", error);
+    return false;
   }
 }
 
@@ -396,65 +398,37 @@ function renderPayoutMethods() {
     const name = document.createElement("strong");
     name.textContent = method.name;
     const status = document.createElement("span");
-    status.textContent = isAdded ? "Added to demo profile" : "Choose this method to add details";
+    status.textContent = isAdded ? "Ready for demo requests" : "Choose for demo requests";
     details.append(name, status);
     const button = document.createElement("button");
     button.className = isAdded ? "method-button remove-method" : "method-button";
     button.type = "button";
-    button.textContent = isAdded ? "Remove" : "Add method";
-    button.setAttribute("aria-label", `${isAdded ? "Remove" : "Add"} ${method.name} ${isAdded ? "from" : "to"} demo profile`);
+    button.textContent = isAdded ? "Remove" : "Add for demo";
+    button.setAttribute("aria-label", `${isAdded ? "Remove" : "Add"} ${method.name} ${isAdded ? "from" : "for"} demo requests`);
     button.addEventListener("click", () => {
       const methodAdded = !isAdded;
-      state.methods = isAdded
+      const methods = isAdded
         ? state.methods.filter((id) => id !== method.id)
         : [...state.methods, method.id];
       const createdAt = Date.now();
-      state.history.unshift({
+      const event = {
         id: `payout-method-${method.id}-${createdAt}`,
         type: methodAdded ? "payout_method_added" : "payout_method_removed",
         methodId: method.id,
         createdAt,
         status: methodAdded ? "Added" : "Removed",
-      });
-      saveState();
+      };
+      const history = [event, ...state.history];
+      if (!saveState({ ...state, methods, history })) {
+        showToast("Could not save this payout preference. Check browser storage and try again.");
+        return;
+      }
+      state.methods = methods;
+      state.history = history;
       renderPayoutMethods();
-      showToast(`${method.name} ${isAdded ? "removed from" : "added to"} demo profile`);
+      showToast(`${method.name} ${isAdded ? "removed from" : "added for"} demo requests`);
     });
     card.append(mark, details, button);
-
-    if (isAdded) {
-      const form = document.createElement("form");
-      form.className = "payout-entry-form";
-      const label = document.createElement("label");
-      label.htmlFor = `${method.id}-payout-detail`;
-      label.textContent = method.detail;
-      const input = document.createElement("input");
-      input.id = `${method.id}-payout-detail`;
-      input.name = `${method.id}-payout-detail`;
-      input.type = method.type;
-      input.placeholder = method.placeholder;
-      input.autocomplete = "off";
-      input.required = true;
-      input.maxLength = method.type === "email" ? 254 : 100;
-      input.addEventListener("input", () => {
-        feedback.textContent = "";
-      });
-      const feedback = document.createElement("span");
-      feedback.className = "payout-feedback";
-      feedback.setAttribute("aria-live", "polite");
-      const submit = document.createElement("button");
-      submit.className = "detail-save-button";
-      submit.type = "submit";
-      submit.textContent = "Check entry";
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        if (!input.reportValidity()) return;
-        feedback.textContent = "Entry looks good. Demo only — details were not sent or saved.";
-      });
-      form.append(label, input, submit, feedback);
-      card.appendChild(form);
-    }
-
     methodsList.appendChild(card);
   }
 }
@@ -505,7 +479,10 @@ function startPreview() {
     seconds += 1;
     document.querySelector("#watch-progress-fill").style.width = `${Math.min(seconds / duration, 1) * 100}%`;
     document.querySelector("#watch-status").textContent = seconds < duration ? `Previewing · ${duration - seconds} seconds left` : "Preview complete";
-    if (seconds >= duration) completePreview();
+    if (seconds >= duration) {
+      completePreview();
+      dialog.close();
+    }
   }, 1000);
 }
 

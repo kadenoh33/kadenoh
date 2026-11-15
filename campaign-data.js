@@ -8,10 +8,12 @@
     auth: "kadenoh-demo-session-v1",
   });
   const payoutMethods = [
-    { id: "paypal", name: "PayPal", mark: "P", detail: "PayPal email", placeholder: "name@example.com", type: "email" },
-    { id: "wise", name: "Wise", mark: "W", detail: "Wise email or tag", placeholder: "Your Wise email or tag", type: "text" },
-    { id: "binance", name: "Binance", mark: "B", detail: "Binance Pay ID", placeholder: "Your Binance Pay ID", type: "text" },
+    { id: "paypal", name: "PayPal", mark: "P" },
+    { id: "wise", name: "Wise", mark: "W" },
+    { id: "binance", name: "Binance", mark: "B" },
   ];
+  const minimumWithdrawalAmount = 15;
+  const demoCreditAmount = minimumWithdrawalAmount;
   const defaultCampaigns = [
     { id: "morning-brew", title: "A brighter morning brew", category: "Food", tag: "FOOD & DRINK", emoji: "☕", image: "assets/campaign-coffee.jpg", reward: 0.12, duration: 8, description: "Meet a smoother start to your morning with this quick introduction to Good Day Coffee.", colors: ["#e8ddd0", "#f2eadc"] },
     { id: "move-easy", title: "Move a little easier", category: "Lifestyle", tag: "WELLNESS", emoji: "👟", image: "assets/campaign-wellness.jpg", reward: 0.18, duration: 10, description: "Take a look at everyday essentials designed to make moving feel a little more comfortable.", colors: ["#dce9df", "#eaf0e8"] },
@@ -110,6 +112,9 @@
         Number.isFinite(event.amount) && event.amount > 0 && event.amount <= 1000 &&
         event.status === "Requested (demo)";
     }
+    if (event.type === "demo_credit") {
+      return event.amount === demoCreditAmount && event.status === "Added (demo)";
+    }
     if (event.type === "payout_method_added" || event.type === "payout_method_removed") {
       return payoutMethods.some((method) => method.id === event.methodId) &&
         event.status === (event.type === "payout_method_added" ? "Added" : "Removed");
@@ -167,15 +172,21 @@
       const campaign = campaigns.find((item) => item.id === id);
       return total + (campaign ? campaign.reward : 0);
     }, saved.referralRewarded === true ? referralReward : 0);
-    const withdrawals = loadHistory(saved, campaigns)
+    const history = loadHistory(saved, campaigns);
+    const credits = history
+      .filter((event) => event.type === "demo_credit")
+      .reduce((total, event) => total + event.amount, 0);
+    const withdrawals = history
       .filter((event) => event.type === "withdrawal")
       .reduce((total, event) => total + event.amount, 0);
-    return Math.max(0, Math.round((earnings - withdrawals) * 100) / 100);
+    return Math.max(0, Math.round((earnings + credits - withdrawals) * 100) / 100);
   }
 
   window.KadenohDemoStore = Object.freeze({
     keys,
     payoutMethods,
+    minimumWithdrawalAmount,
+    demoCreditAmount,
     defaultCampaigns: () => cloneCampaigns(defaultCampaigns),
     isValidCampaign,
     loadCampaigns,
