@@ -1,6 +1,7 @@
 let campaigns = window.KadenohDemoStore.loadCampaigns();
 
 const payoutMethods = window.KadenohDemoStore.payoutMethods;
+const calculatePreviewDuration = window.KadenohDemoStore.calculatePreviewDuration;
 
 const STORAGE_KEY = window.KadenohDemoStore.keys.progress;
 const PROFILE_IMAGE_KEY = window.KadenohDemoStore.keys.profileImage;
@@ -72,6 +73,13 @@ function saveState(nextState = state) {
 
 function formatCurrency(amount) {
   return `$${amount.toFixed(2)}`;
+}
+
+function formatPreviewDuration(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  if (minutes === 0) return `${seconds} sec`;
+  return remainingSeconds ? `${minutes} min ${remainingSeconds} sec` : `${minutes} min`;
 }
 
 function applyTheme(theme) {
@@ -302,7 +310,7 @@ function renderCampaigns(filter = "All") {
     category.className = "campaign-category";
     category.textContent = campaign.category;
     const length = document.createElement("span");
-    length.textContent = `${campaign.duration} sec`;
+    length.textContent = formatPreviewDuration(calculatePreviewDuration(campaign.reward));
     meta.append(category, length);
     const title = document.createElement("h3");
     title.textContent = campaign.title;
@@ -461,7 +469,8 @@ function openCampaign(campaign) {
   document.querySelector("#dialog-description").textContent = campaign.description;
   document.querySelector("#dialog-emoji").textContent = campaign.emoji;
   document.querySelector("#dialog-art").style.background = `linear-gradient(135deg, ${campaign.colors[0]}, ${campaign.colors[1]})`;
-  document.querySelector("#watch-status").textContent = `Preview · ${campaign.duration} seconds`;
+  document.querySelector("#watch-status").textContent =
+    `Preview · ${formatPreviewDuration(calculatePreviewDuration(campaign.reward))}`;
   document.querySelector("#watch-progress-fill").style.width = "0";
   watchButton.textContent = "Start preview";
   watchButton.disabled = false;
@@ -472,13 +481,14 @@ function startPreview() {
   if (!activeCampaign || watchButton.disabled) return;
   watchButton.disabled = true;
   let seconds = 0;
-  const duration = activeCampaign.duration;
+  const duration = calculatePreviewDuration(activeCampaign.reward);
   watchButton.textContent = "Previewing…";
-  document.querySelector("#watch-status").textContent = `Previewing · ${duration} seconds`;
+  document.querySelector("#watch-status").textContent = `Previewing · ${formatPreviewDuration(duration)}`;
   watchTimer = window.setInterval(() => {
     seconds += 1;
     document.querySelector("#watch-progress-fill").style.width = `${Math.min(seconds / duration, 1) * 100}%`;
-    document.querySelector("#watch-status").textContent = seconds < duration ? `Previewing · ${duration - seconds} seconds left` : "Preview complete";
+    document.querySelector("#watch-status").textContent =
+      seconds < duration ? `Previewing · ${formatPreviewDuration(duration - seconds)} left` : "Preview complete";
     if (seconds >= duration) {
       completePreview();
       dialog.close();

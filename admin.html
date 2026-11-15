@@ -294,16 +294,21 @@
             />
           </label>
           <label>
-            Preview length (seconds)
+            Preview time (calculated)
             <input
               id="campaign-duration"
               name="duration"
               type="number"
               min="1"
-              max="60"
+              max="100000"
               step="1"
+              readonly
               required
+              aria-describedby="campaign-duration-help"
             />
+            <span class="admin-field-help" id="campaign-duration-help">
+              10 seconds for every $0.10 of demo reward.
+            </span>
           </label>
         </div>
         <label>

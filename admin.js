@@ -9,6 +9,15 @@ const campaignRows = document.querySelector("#campaign-rows");
 const activityRows = document.querySelector("#activity-rows");
 const campaignDialog = document.querySelector("#campaign-dialog");
 const campaignForm = document.querySelector("#campaign-form");
+const campaignRewardInput = document.querySelector("#campaign-reward");
+const campaignDurationInput = document.querySelector("#campaign-duration");
+
+function updateCalculatedPreviewDuration() {
+  const reward = campaignRewardInput.valueAsNumber;
+  campaignDurationInput.value = Number.isFinite(reward) && reward >= 0
+    ? String(demoStore.calculatePreviewDuration(reward))
+    : "";
+}
 
 function setStatus(elementId, message) {
   document.querySelector(elementId).textContent = message;
@@ -194,8 +203,8 @@ function openCampaignEditor(campaign) {
   document.querySelector("#campaign-id").value = campaign ? campaign.id : "";
   document.querySelector("#campaign-title").value = campaign ? campaign.title : "";
   document.querySelector("#campaign-tag").value = campaign ? campaign.tag : "";
-  document.querySelector("#campaign-reward").value = campaign ? String(campaign.reward) : "0.10";
-  document.querySelector("#campaign-duration").value = campaign ? String(campaign.duration) : "8";
+  campaignRewardInput.value = campaign ? String(campaign.reward) : "0.10";
+  updateCalculatedPreviewDuration();
   document.querySelector("#campaign-emoji").value = campaign ? campaign.emoji : "✨";
   document.querySelector("#campaign-image").value = campaign ? campaign.image : "";
   document.querySelector("#campaign-description").value = campaign ? campaign.description : "";
@@ -237,6 +246,8 @@ document.querySelector("#create-campaign").addEventListener("click", () => {
   openCampaignEditor(null);
 });
 
+campaignRewardInput.addEventListener("input", updateCalculatedPreviewDuration);
+
 document.querySelector("#close-campaign-dialog").addEventListener("click", () => campaignDialog.close());
 document.querySelector("#cancel-campaign").addEventListener("click", () => campaignDialog.close());
 
@@ -247,14 +258,15 @@ campaignForm.addEventListener("submit", (event) => {
   const existingId = document.querySelector("#campaign-id").value;
   const original = campaigns.find((campaign) => campaign.id === existingId);
   const title = document.querySelector("#campaign-title").value.trim();
+  const reward = Number(campaignRewardInput.value);
   const campaign = {
     ...(original || {}),
     id: original ? original.id : createCampaignId(title),
     title,
     category: document.querySelector("#campaign-category").value,
     tag: document.querySelector("#campaign-tag").value.trim().toUpperCase(),
-    reward: Number(document.querySelector("#campaign-reward").value),
-    duration: Number(document.querySelector("#campaign-duration").value),
+    reward,
+    duration: demoStore.calculatePreviewDuration(reward),
     emoji: document.querySelector("#campaign-emoji").value.trim(),
     image: document.querySelector("#campaign-image").value.trim(),
     description: document.querySelector("#campaign-description").value.trim(),
