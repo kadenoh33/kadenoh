@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4efe6" />
+    <meta
+      name="description"
+      content="Review your Kadenoh demo rewards, withdrawals, and account activity."
+    />
+    <title>Kadenoh — History</title>
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("kadenoh-theme") === "dark" ? "dark" : "light";
+      } catch (error) {
+        console.warn("Could not load the saved color theme.", error);
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="history.css" />
+    <script src="campaign-data.js" defer></script>
+    <script src="history.js" defer></script>
+    <script src="auth-ui.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="Kadenoh dashboard">
+        <span class="brand-mark">k</span> kadenoh<span class="brand-period"
+          >.</span
+        >
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-link" href="index.html">Dashboard</a>
+        <a class="nav-link active" href="history.html" aria-current="page"
+          >History</a
+        >
+        <a class="nav-link" href="social-demo.html">Social demo</a>
+      </nav>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        type="button"
+        aria-label="Switch to dark theme"
+        title="Switch to dark theme"
+      >
+        <span aria-hidden="true">☾</span>
+      </button>
+    </header>
+
+    <main class="history-main">
+      <section class="history-intro">
+        <div>
+          <p class="eyebrow"><span class="live-dot"></span> ACCOUNT ACTIVITY</p>
+          <h1>Your history.</h1>
+          <p class="welcome-copy">
+            Review campaign rewards, withdrawal requests, and payout activity
+            saved in this browser.
+          </p>
+        </div>
+        <span class="demo-tag">LOCAL DEMO</span>
+      </section>
+
+      <aside class="history-notice">
+        <strong>Demo history only.</strong> Entries are stored in this browser.
+        No money is transferred; a demo withdrawal only reserves demo rewards.
+      </aside>
+
+      <section class="history-summary" aria-label="History totals">
+        <article class="history-stat">
+          <span>Available demo balance</span>
+          <strong id="history-balance">$0.00</strong>
+        </article>
+        <article class="history-stat">
+          <span>Total demo rewards</span>
+          <strong id="history-earned">$0.00</strong>
+        </article>
+        <article class="history-stat">
+          <span>Demo withdrawals</span>
+          <strong id="history-withdrawn">$0.00</strong>
+        </article>
+        <article class="history-stat">
+          <span>History entries</span>
+          <strong id="history-count">0</strong>
+        </article>
+      </section>
+
+      <section class="history-panel withdrawal-panel" aria-labelledby="withdrawal-title">
+        <div class="history-section-heading">
+          <div>
+            <p class="eyebrow">SIMULATED PAYOUT</p>
+            <h2 id="withdrawal-title">Request a demo withdrawal</h2>
+          </div>
+          <span class="history-local-label" id="withdrawal-available">
+            Available: $0.00
+          </span>
+        </div>
+        <p class="history-help">
+          A request is recorded here and deducted from your available demo
+          balance. No payout details are collected or sent.
+        </p>
+        <form class="withdrawal-form" id="withdrawal-form">
+          <label for="withdrawal-amount">Amount ($)</label>
+          <input
+            id="withdrawal-amount"
+            name="amount"
+            type="number"
+            min="0.01"
+            step="0.01"
+            required
+            inputmode="decimal"
+            placeholder="0.00"
+          />
+          <label for="withdrawal-method">Saved demo method</label>
+          <select id="withdrawal-method" name="method" required>
+            <option value="">Select a payout method</option>
+          </select>
+          <button class="primary-button" id="request-withdrawal" type="submit">
+            Simulate withdrawal
+          </button>
+        </form>
+        <p class="history-method-help" id="withdrawal-method-help">
+          Add a payout method on the <a href="index.html#payout-title">dashboard</a>
+          before making a demo request.
+        </p>
+        <p class="history-status" id="withdrawal-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="history-panel" aria-labelledby="history-table-title">
+        <div class="history-section-heading history-table-heading">
+          <div>
+            <p class="eyebrow">YOUR RECORDS</p>
+            <h2 id="history-table-title">Transactions & activity</h2>
+          </div>
+          <span class="history-local-label">This browser only</span>
+        </div>
+        <div class="history-filters" role="group" aria-label="Filter history">
+          <button class="history-filter is-selected" type="button" data-filter="all">
+            All activity
+          </button>
+          <button class="history-filter" type="button" data-filter="rewards">
+            Rewards
+          </button>
+          <button class="history-filter" type="button" data-filter="withdrawals">
+            Withdrawals
+          </button>
+          <button class="history-filter" type="button" data-filter="account">
+            Payout activity
+          </button>
+        </div>
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th scope="col">Activity</th>
+                <th scope="col">Type</th>
+                <th scope="col">Status</th>
+                <th scope="col">Date</th>
+                <th scope="col">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="history-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand footer-brand" href="index.html">
+        <span class="brand-mark">k</span> kadenoh<span class="brand-period"
+          >.</span
+        >
+      </a>
+      <span>History for the Kadenoh local demo.</span>
+      <span>© 2026 Kadenoh demo</span>
+    </footer>
+  </body>
+</html>

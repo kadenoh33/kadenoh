@@ -33,6 +33,7 @@ function readProgress() {
       : [],
     activity: Array.isArray(saved.activity) ? saved.activity : [],
     referralRewarded: saved.referralRewarded === true,
+    history: demoStore.loadHistory(saved, campaigns),
   };
 }
 
@@ -42,11 +43,7 @@ function formatCurrency(amount) {
 
 function renderOverview(progress) {
   const activeCampaignCount = campaigns.filter((campaign) => campaign.active !== false).length;
-  const campaignEarnings = progress.viewed.reduce((sum, id) => {
-    const campaign = campaigns.find((item) => item.id === id);
-    return sum + (campaign ? campaign.reward : 0);
-  }, 0);
-  const balance = campaignEarnings + (progress.referralRewarded ? 1 : 0);
+  const balance = demoStore.calculateDemoBalance(progress, campaigns);
 
   document.querySelector("#active-campaign-count").textContent = String(activeCampaignCount);
   document.querySelector("#preview-count").textContent = String(progress.viewed.length);

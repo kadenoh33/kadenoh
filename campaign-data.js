@@ -7,6 +7,11 @@
     theme: "kadenoh-theme",
     auth: "kadenoh-demo-session-v1",
   });
+  const payoutMethods = [
+    { id: "paypal", name: "PayPal", mark: "P", detail: "PayPal email", placeholder: "name@example.com", type: "email" },
+    { id: "wise", name: "Wise", mark: "W", detail: "Wise email or tag", placeholder: "Your Wise email or tag", type: "text" },
+    { id: "binance", name: "Binance", mark: "B", detail: "Binance Pay ID", placeholder: "Your Binance Pay ID", type: "text" },
+  ];
   const defaultCampaigns = [
     { id: "morning-brew", title: "A brighter morning brew", category: "Food", tag: "FOOD & DRINK", emoji: "☕", image: "assets/campaign-coffee.jpg", reward: 0.12, duration: 8, description: "Meet a smoother start to your morning with this quick introduction to Good Day Coffee.", colors: ["#e8ddd0", "#f2eadc"] },
     { id: "move-easy", title: "Move a little easier", category: "Lifestyle", tag: "WELLNESS", emoji: "👟", image: "assets/campaign-wellness.jpg", reward: 0.18, duration: 10, description: "Take a look at everyday essentials designed to make moving feel a little more comfortable.", colors: ["#dce9df", "#eaf0e8"] },
@@ -87,13 +92,97 @@
     localStorage.removeItem(keys.campaigns);
   }
 
+  function isValidHistoryEvent(event, campaigns) {
+    if (!event || typeof event !== "object" || typeof event.id !== "string" || !event.id || event.id.length > 160) return false;
+    if (!(event.createdAt === null || (Number.isFinite(event.createdAt) && event.createdAt > 0 && event.createdAt <= Date.now()))) return false;
+
+    if (event.type === "campaign_reward") {
+      return campaigns.some((campaign) => campaign.id === event.campaignId) &&
+        Number.isFinite(event.amount) && event.amount >= 0 && event.amount <= 1000 &&
+        event.status === "Completed";
+    }
+    if (event.type === "referral_reward") {
+      return Number.isFinite(event.amount) && event.amount >= 0 && event.amount <= 1000 &&
+        event.status === "Completed";
+    }
+    if (event.type === "withdrawal") {
+      return payoutMethods.some((method) => method.id === event.methodId) &&
+        Number.isFinite(event.amount) && event.amount > 0 && event.amount <= 1000 &&
+        event.status === "Requested (demo)";
+    }
+    if (event.type === "payout_method_added" || event.type === "payout_method_removed") {
+      return payoutMethods.some((method) => method.id === event.methodId) &&
+        event.status === (event.type === "payout_method_added" ? "Added" : "Removed");
+    }
+    return false;
+  }
+
+  function loadHistory(progress, campaigns) {
+    const saved = progress && typeof progress === "object" && !Array.isArray(progress) ? progress : {};
+    const history = Array.isArray(saved.history)
+      ? saved.history.filter((event) => isValidHistoryEvent(event, campaigns)).map((event) => ({ ...event }))
+      : [];
+    const recordedCampaigns = new Set(
+      history.filter((event) => event.type === "campaign_reward").map((event) => event.campaignId),
+    );
+    const activityTimes = new Map();
+    if (Array.isArray(saved.activity)) {
+      for (const activity of saved.activity) {
+        if (activity && Number.isFinite(activity.createdAt) && activity.createdAt > 0 && activity.createdAt <= Date.now()) {
+          activityTimes.set(activity.id, activity.createdAt);
+        }
+      }
+    }
+
+    const viewed = Array.isArray(saved.viewed) ? [...new Set(saved.viewed)] : [];
+    for (const id of viewed) {
+      const campaign = campaigns.find((item) => item.id === id);
+      if (!campaign || recordedCampaigns.has(id)) continue;
+      history.push({
+        id: `legacy-campaign-${id}`,
+        type: "campaign_reward",
+        campaignId: id,
+        amount: campaign.reward,
+        createdAt: activityTimes.get(id) || null,
+        status: "Completed",
+      });
+    }
+    if (saved.referralRewarded === true && !history.some((event) => event.type === "referral_reward")) {
+      history.push({
+        id: "legacy-referral-reward",
+        type: "referral_reward",
+        amount: 1,
+        createdAt: null,
+        status: "Completed",
+      });
+    }
+
+    return history.sort((left, right) => (right.createdAt || 0) - (left.createdAt || 0));
+  }
+
+  function calculateDemoBalance(progress, campaigns, referralReward = 1) {
+    const saved = progress && typeof progress === "object" ? progress : {};
+    const viewed = Array.isArray(saved.viewed) ? [...new Set(saved.viewed)] : [];
+    const earnings = viewed.reduce((total, id) => {
+      const campaign = campaigns.find((item) => item.id === id);
+      return total + (campaign ? campaign.reward : 0);
+    }, saved.referralRewarded === true ? referralReward : 0);
+    const withdrawals = loadHistory(saved, campaigns)
+      .filter((event) => event.type === "withdrawal")
+      .reduce((total, event) => total + event.amount, 0);
+    return Math.max(0, Math.round((earnings - withdrawals) * 100) / 100);
+  }
+
   window.KadenohDemoStore = Object.freeze({
     keys,
+    payoutMethods,
     defaultCampaigns: () => cloneCampaigns(defaultCampaigns),
     isValidCampaign,
     loadCampaigns,
     saveCampaigns,
     resetCampaigns,
+    loadHistory,
+    calculateDemoBalance,
     getLoadError: () => loadError,
   });
 })();

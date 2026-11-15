@@ -1,10 +1,6 @@
 let campaigns = window.KadenohDemoStore.loadCampaigns();
 
-const payoutMethods = [
-  { id: "paypal", name: "PayPal", mark: "P", detail: "PayPal email", placeholder: "name@example.com", type: "email" },
-  { id: "wise", name: "Wise", mark: "W", detail: "Wise email or tag", placeholder: "Your Wise email or tag", type: "text" },
-  { id: "binance", name: "Binance Pay", mark: "B", detail: "Binance Pay ID", placeholder: "Your Binance Pay ID", type: "text" },
-];
+const payoutMethods = window.KadenohDemoStore.payoutMethods;
 
 const STORAGE_KEY = window.KadenohDemoStore.keys.progress;
 const PROFILE_IMAGE_KEY = window.KadenohDemoStore.keys.profileImage;
@@ -56,10 +52,11 @@ function loadState() {
       activity: validActivity,
       methods: [...new Set(validMethods)],
       referralRewarded: saved.referralRewarded === true,
+      history: window.KadenohDemoStore.loadHistory(saved, campaigns),
     };
   } catch (error) {
     console.warn("Could not load demo progress from local storage.", error);
-    return { viewed: [], activity: [], methods: [], referralRewarded: false };
+    return { viewed: [], activity: [], methods: [], referralRewarded: false, history: [] };
   }
 }
 
@@ -330,11 +327,7 @@ function renderCampaigns(filter = "All") {
 }
 
 function renderStats() {
-  const campaignEarnings = state.viewed.reduce((sum, id) => {
-    const campaign = campaigns.find((item) => item.id === id);
-    return sum + (campaign ? campaign.reward : 0);
-  }, 0);
-  const completed = campaignEarnings + (state.referralRewarded ? REFERRAL_REWARD : 0);
+  const completed = window.KadenohDemoStore.calculateDemoBalance(state, campaigns, REFERRAL_REWARD);
   document.querySelector("#balance-value").textContent = formatCurrency(completed);
   document.querySelector("#views-value").textContent = String(state.viewed.length);
   document.querySelector("#goal-count").textContent = String(Math.min(state.viewed.length, 5));
@@ -411,9 +404,18 @@ function renderPayoutMethods() {
     button.textContent = isAdded ? "Remove" : "Add method";
     button.setAttribute("aria-label", `${isAdded ? "Remove" : "Add"} ${method.name} ${isAdded ? "from" : "to"} demo profile`);
     button.addEventListener("click", () => {
+      const methodAdded = !isAdded;
       state.methods = isAdded
         ? state.methods.filter((id) => id !== method.id)
         : [...state.methods, method.id];
+      const createdAt = Date.now();
+      state.history.unshift({
+        id: `payout-method-${method.id}-${createdAt}`,
+        type: methodAdded ? "payout_method_added" : "payout_method_removed",
+        methodId: method.id,
+        createdAt,
+        status: methodAdded ? "Added" : "Removed",
+      });
       saveState();
       renderPayoutMethods();
       showToast(`${method.name} ${isAdded ? "removed from" : "added to"} demo profile`);
@@ -512,8 +514,17 @@ function completePreview() {
   watchTimer = null;
   if (!activeCampaign || state.viewed.includes(activeCampaign.id)) return;
   state.viewed.push(activeCampaign.id);
-  state.activity.unshift({ id: activeCampaign.id, createdAt: Date.now() });
+  const createdAt = Date.now();
+  state.activity.unshift({ id: activeCampaign.id, createdAt });
   state.activity = state.activity.slice(0, 3);
+  state.history.unshift({
+    id: `campaign-reward-${activeCampaign.id}-${createdAt}`,
+    type: "campaign_reward",
+    campaignId: activeCampaign.id,
+    amount: activeCampaign.reward,
+    createdAt,
+    status: "Completed",
+  });
   saveState();
   renderCampaigns(document.querySelector(".filter-chip.selected").dataset.filter);
   renderStats();
@@ -557,6 +568,14 @@ document.querySelector("#copy-referral-link").addEventListener("click", async ()
 document.querySelector("#simulate-referral").addEventListener("click", () => {
   if (state.referralRewarded) return;
   state.referralRewarded = true;
+  const createdAt = Date.now();
+  state.history.unshift({
+    id: `referral-reward-${createdAt}`,
+    type: "referral_reward",
+    amount: REFERRAL_REWARD,
+    createdAt,
+    status: "Completed",
+  });
   saveState();
   renderStats();
   renderReferralOptions();
