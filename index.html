@@ -1,0 +1,459 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4efe6" />
+    <meta
+      name="description"
+      content="Explore sponsored campaigns and track demo rewards in one simple dashboard."
+    />
+    <title>Kadenoh — Your rewards dashboard</title>
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("kadenoh-theme") === "dark" ? "dark" : "light";
+      } catch (error) {
+        console.warn("Could not load the saved color theme.", error);
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="campaign-data.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Kadenoh home"
+        ><span class="brand-mark">k</span> kadenoh<span class="brand-period"
+          >.</span
+        ></a
+      >
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-link active" href="#campaigns">Discover</a>
+        <a class="nav-link" href="#activity">Activity</a>
+        <a class="nav-link" href="social-demo.html">Social demo</a>
+        <a class="nav-link" href="#referrals" aria-label="Refer and earn"
+          >Invite</a
+        >
+      </nav>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        type="button"
+        aria-label="Switch to dark theme"
+        title="Switch to dark theme"
+      >
+        <span aria-hidden="true">☾</span>
+      </button>
+      <button class="profile-button" type="button" aria-label="Your profile">
+        <span class="profile-avatar"
+          ><span id="profile-initial">DE</span
+          ><img id="profile-image" alt="" hidden /></span
+        ><span class="profile-name" id="profile-name">Dennis</span
+        ><span class="chevron">⌄</span>
+      </button>
+    </header>
+
+    <main>
+      <section class="welcome-row">
+        <div>
+          <p class="eyebrow"><span class="live-dot"></span> YOUR REWARDS DASHBOARD</p>
+          <h1>Make your <span>minutes count.</span></h1>
+          <p class="welcome-copy">
+            Explore sponsor previews and track your demo rewards in one place.
+          </p>
+        </div>
+        <div class="date-pill">
+          <span aria-hidden="true">☀</span> <span id="today-label">Today</span>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Your rewards summary">
+        <article class="stat-card balance-card">
+          <div class="stat-top">
+            <span class="stat-label">Demo balance</span
+            ><span class="stat-icon mint-icon" aria-hidden="true">↗</span>
+          </div>
+          <p class="stat-value" id="balance-value">$0.00</p>
+          <p class="stat-foot"><span class="positive">+ $0.00</span> tracked</p>
+          <div class="balance-decoration" aria-hidden="true"></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top">
+            <span class="stat-label">Previews viewed</span
+            ><span class="stat-icon lilac-icon" aria-hidden="true">◉</span>
+          </div>
+          <p class="stat-value" id="views-value">0</p>
+          <p class="stat-foot">Explore to make progress</p>
+        </article>
+        <article class="stat-card progress-card">
+          <div class="stat-top">
+            <span class="stat-label">Daily goal</span
+            ><span class="stat-icon peach-icon" aria-hidden="true">✦</span>
+          </div>
+          <p class="stat-value">
+            <span id="goal-count">0</span><span class="stat-unit"> / 5</span>
+          </p>
+          <div class="progress-track"><span id="goal-progress"></span></div>
+          <p class="stat-foot">5 previews make up your daily goal</p>
+        </article>
+      </section>
+
+      <section class="campaign-section" id="campaigns">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">MADE FOR YOUR BREAK</p>
+            <h2>Today’s picks <span class="sparkle">✳</span></h2>
+          </div>
+          <a class="text-link" href="#campaign-list"
+            >View all <span aria-hidden="true">→</span></a
+          >
+        </div>
+        <div class="filter-row" role="group" aria-label="Filter campaigns">
+          <button class="filter-chip selected" type="button" data-filter="All">
+            All picks <span class="chip-count">24</span>
+          </button>
+          <button class="filter-chip" type="button" data-filter="Lifestyle">
+            Lifestyle
+          </button>
+          <button class="filter-chip" type="button" data-filter="Clothing">
+            Clothing
+          </button>
+          <button class="filter-chip" type="button" data-filter="Tech">
+            Tech
+          </button>
+          <button class="filter-chip" type="button" data-filter="Food">
+            Food & drink
+          </button>
+          <button class="filter-chip" type="button" data-filter="Travel">
+            Travel
+          </button>
+          <button class="filter-chip" type="button" data-filter="Cars">
+            Cars
+          </button>
+          <button class="filter-chip" type="button" data-filter="Cutlery">
+            Cutlery
+          </button>
+          <button class="filter-chip" type="button" data-filter="Furniture">
+            Furniture
+          </button>
+          <button class="filter-chip" type="button" data-filter="House">
+            House
+          </button>
+          <button class="filter-chip" type="button" data-filter="Watch">
+            Watch
+          </button>
+          <button class="filter-chip" type="button" data-filter="Freezer">
+            Freezer
+          </button>
+          <button class="filter-chip" type="button" data-filter="Tables">
+            Tables
+          </button>
+          <button class="filter-chip" type="button" data-filter="Chairs">
+            Chairs
+          </button>
+          <button class="filter-chip" type="button" data-filter="Lights">
+            Lights
+          </button>
+          <button class="filter-chip" type="button" data-filter="Utensils">
+            Utensils
+          </button>
+          <button class="filter-chip" type="button" data-filter="Laptop">
+            Laptop
+          </button>
+          <button class="filter-chip" type="button" data-filter="Charger">
+            Charger
+          </button>
+        </div>
+        <div class="campaign-grid" id="campaign-list" aria-live="polite"></div>
+      </section>
+
+      <section class="bottom-grid" id="how-it-works">
+        <article class="how-card">
+          <div class="how-copy">
+            <p class="eyebrow">SIMPLE BY DESIGN</p>
+            <h2>Good things come<br />in small moments.</h2>
+            <p>
+              Choose a campaign, take a look, and see your demo rewards add up.
+              No complicated steps.
+            </p>
+            <a href="#campaigns" class="how-link"
+              >Explore campaigns <span aria-hidden="true">→</span></a
+            >
+          </div>
+          <div class="how-illustration" aria-hidden="true">
+            <div class="sun-shape"></div>
+            <div class="phone-shape">
+              <div class="phone-speaker"></div>
+              <div class="phone-card"><span>✦</span><i></i><i></i><b></b></div>
+            </div>
+            <div class="coin-shape">$</div>
+          </div>
+        </article>
+        <article class="activity-card" id="activity">
+          <div class="activity-heading">
+            <div>
+              <p class="eyebrow">JUST FOR YOU</p>
+              <h2>Recent activity</h2>
+            </div>
+            <span class="activity-live"><i></i> Local demo</span>
+          </div>
+          <div id="activity-list" class="activity-list"></div>
+        </article>
+      </section>
+
+      <section class="payout-section" aria-labelledby="payout-title">
+        <div class="payout-heading">
+          <div>
+            <p class="eyebrow">YOUR PREFERENCES</p>
+            <h2 id="payout-title">Payout methods</h2>
+            <p class="payout-copy">
+              Preview how payout preferences could be managed.
+            </p>
+          </div>
+          <span class="demo-tag">DEMO ONLY</span>
+        </div>
+        <div class="payout-methods" id="payout-methods"></div>
+        <p class="payout-disclaimer">
+          Never enter a password or recovery phrase. This demo does not send or
+          save the details you type; they clear when you reload the page.
+        </p>
+      </section>
+
+      <section
+        class="payout-section referral-section"
+        id="referrals"
+        aria-labelledby="referral-title"
+      >
+        <div class="payout-heading">
+          <div>
+            <p class="eyebrow">SHARE WITH A FRIEND</p>
+            <h2 id="referral-title">Invite a friend</h2>
+            <p class="payout-copy">
+              Share your link and try a simulated $1.00 referral reward.
+            </p>
+          </div>
+          <span class="demo-tag">DEMO REWARD</span>
+        </div>
+        <div class="referral-link-row">
+          <label for="referral-link">YOUR REFERRAL LINK</label>
+          <div class="referral-link-controls">
+            <input
+              class="referral-link-input"
+              id="referral-link"
+              type="url"
+              readonly
+              aria-label="Your referral link"
+            />
+            <button
+              class="primary-button"
+              id="copy-referral-link"
+              type="button"
+            >
+              Copy link
+            </button>
+          </div>
+        </div>
+        <div
+          class="referral-share-options"
+          aria-label="Share your referral link"
+        >
+          <a class="method-button" id="referral-email" href="mailto:">
+            Email invite
+          </a>
+          <a
+            class="method-button"
+            id="referral-whatsapp"
+            href="https://wa.me/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp invite
+          </a>
+        </div>
+        <div class="referral-reward-row">
+          <button class="primary-button" id="simulate-referral" type="button">
+            Simulate referral
+          </button>
+          <p id="referral-status" role="status" aria-live="polite"></p>
+        </div>
+        <p class="payout-disclaimer">
+          Demo only: referrals are not tracked, and no real money is paid.
+          Simulated reward can be claimed once in this browser.
+        </p>
+      </section>
+
+      <aside class="demo-notice" id="demo-notice">
+        <span class="notice-icon" aria-hidden="true">i</span>
+        <p>
+          <strong>Demo experience.</strong> Campaigns and rewards on this site
+          are simulated for demonstration only. No real advertisements are
+          shown, and no money is earned or paid out.
+        </p>
+        <button
+          class="notice-close"
+          type="button"
+          aria-label="Dismiss demo notice"
+        >
+          ×
+        </button>
+      </aside>
+    </main>
+
+    <footer>
+      <a class="brand footer-brand" href="#"
+        ><span class="brand-mark">k</span> kadenoh<span class="brand-period"
+          >.</span
+        ></a
+      ><span>Take a little break. Find a little something.</span
+      ><span>© 2026 Kadenoh demo</span
+      ><a href="admin.html">Admin preview</a>
+    </footer>
+
+    <dialog
+      class="profile-dialog"
+      id="profile-dialog"
+      aria-labelledby="profile-dialog-title"
+    >
+      <button
+        class="dialog-close"
+        id="close-profile-dialog"
+        type="button"
+        aria-label="Close profile"
+      >
+        ×
+      </button>
+      <div class="profile-photo-preview">
+        <span id="profile-dialog-initial">D</span>
+        <img id="profile-dialog-image" alt="" hidden />
+      </div>
+      <h2 id="profile-dialog-title">Your profile</h2>
+      <p class="profile-copy">
+        Update your details and photo. They are stored only in this browser and
+        are never uploaded.
+      </p>
+      <div class="profile-photo-actions">
+        <label class="photo-upload-button" for="profile-photo-input"
+          >Choose photo</label
+        >
+        <button
+          class="photo-remove-button"
+          id="remove-profile-photo"
+          type="button"
+          disabled
+        >
+          Remove photo
+        </button>
+        <input
+          id="profile-photo-input"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+        />
+      </div>
+      <p class="profile-photo-help">JPG, PNG, or WebP · Max 8 MB</p>
+      <p
+        class="profile-photo-status"
+        id="profile-photo-status"
+        role="status"
+        aria-live="polite"
+      ></p>
+      <form class="profile-info-form" id="profile-info-form">
+        <div class="profile-field">
+          <label for="profile-display-name">Display name</label>
+          <input
+            id="profile-display-name"
+            name="displayName"
+            type="text"
+            autocomplete="name"
+            maxlength="80"
+            required
+          />
+        </div>
+        <div class="profile-field">
+          <label for="profile-email">Email address</label>
+          <input
+            id="profile-email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            maxlength="254"
+            placeholder="you@example.com"
+          />
+        </div>
+        <div class="profile-field">
+          <label for="profile-date-of-birth">Date of birth</label>
+          <input
+            id="profile-date-of-birth"
+            name="dateOfBirth"
+            type="date"
+            autocomplete="bday"
+          />
+        </div>
+        <div class="profile-field">
+          <label for="profile-study-level">Level of study</label>
+          <select id="profile-study-level" name="studyLevel">
+            <option value="">Select a level (optional)</option>
+            <option value="high-school">High school</option>
+            <option value="certificate-diploma">Certificate or diploma</option>
+            <option value="undergraduate">Undergraduate</option>
+            <option value="postgraduate">Postgraduate</option>
+            <option value="other">Other</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
+          </select>
+        </div>
+        <div class="profile-field">
+          <label for="profile-location">Location</label>
+          <input
+            id="profile-location"
+            name="location"
+            type="text"
+            autocomplete="address-level2"
+            maxlength="100"
+            placeholder="City, country"
+          />
+        </div>
+        <button class="profile-save-button" type="submit">Save profile</button>
+        <p
+          class="profile-info-status"
+          id="profile-info-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </form>
+    </dialog>
+
+    <dialog
+      class="watch-dialog"
+      id="watch-dialog"
+      aria-labelledby="dialog-title"
+    >
+      <button class="dialog-close" type="button" aria-label="Close campaign">
+        ×
+      </button>
+      <div class="dialog-art" id="dialog-art">
+        <span id="dialog-emoji" aria-hidden="true"></span
+        ><span class="play-symbol" aria-hidden="true">▶</span>
+      </div>
+      <div class="dialog-content">
+        <span class="sponsored-label">SPONSORED CAMPAIGN · DEMO</span>
+        <h2 id="dialog-title"></h2>
+        <p id="dialog-description"></p>
+        <div class="watch-progress"><span id="watch-progress-fill"></span></div>
+        <div class="watch-footer">
+          <span id="watch-status">Campaign preview</span
+          ><button class="primary-button" id="watch-button" type="button">
+            Start preview
+          </button>
+        </div>
+      </div>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

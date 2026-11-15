@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4efe6" />
+    <meta
+      name="description"
+      content="Local-only administration preview for the Kadenoh demo."
+    />
+    <title>Kadenoh — Admin preview</title>
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("kadenoh-theme") === "dark" ? "dark" : "light";
+      } catch (error) {
+        console.warn("Could not load the saved color theme.", error);
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="admin.css" />
+    <script src="campaign-data.js" defer></script>
+    <script src="admin.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="Kadenoh dashboard">
+        <span class="brand-mark">k</span> kadenoh<span class="brand-period"
+          >.</span
+        >
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-link" href="index.html">Dashboard</a>
+        <a class="nav-link" href="social-demo.html">Social demo</a>
+        <a class="nav-link active" href="admin.html" aria-current="page"
+          >Admin preview</a
+        >
+      </nav>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        type="button"
+        aria-label="Switch to dark theme"
+        title="Switch to dark theme"
+      >
+        <span aria-hidden="true">☾</span>
+      </button>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-intro">
+        <div>
+          <p class="eyebrow"><span class="live-dot"></span> ADMIN WORKSPACE</p>
+          <h1>Manage your demo.</h1>
+          <p class="welcome-copy">
+            Review campaigns, sample activity, and browser-local settings.
+          </p>
+        </div>
+        <span class="demo-tag">LOCAL DEMO</span>
+      </section>
+
+      <aside class="admin-notice">
+        <strong>Demo admin only.</strong> Changes are stored in this browser.
+        There is no sign-in, server database, or real user account management.
+      </aside>
+
+      <div class="admin-layout">
+        <nav class="admin-side-nav" aria-label="Admin sections">
+          <a href="#overview">Overview</a>
+          <a href="#campaigns">Campaigns</a>
+          <a href="#activity">Activity</a>
+          <a href="#users">Local profile</a>
+          <a href="#settings">Settings</a>
+        </nav>
+
+        <div class="admin-content">
+          <section class="admin-panel" id="overview">
+            <div class="admin-section-heading">
+              <div>
+                <p class="eyebrow">AT A GLANCE</p>
+                <h2>Overview</h2>
+              </div>
+              <span class="admin-local-label">This browser</span>
+            </div>
+            <div class="admin-stats">
+              <article class="admin-stat">
+                <span>Active campaigns</span>
+                <strong id="active-campaign-count">0</strong>
+              </article>
+              <article class="admin-stat">
+                <span>Campaign previews</span>
+                <strong id="preview-count">0</strong>
+              </article>
+              <article class="admin-stat">
+                <span>Demo balance</span>
+                <strong id="demo-balance">$0.00</strong>
+              </article>
+              <article class="admin-stat">
+                <span>Local profiles</span>
+                <strong>1</strong>
+              </article>
+            </div>
+          </section>
+
+          <section class="admin-panel" id="campaigns">
+            <div class="admin-section-heading">
+              <div>
+                <p class="eyebrow">CONTENT</p>
+                <h2>Campaigns</h2>
+              </div>
+              <button class="primary-button" id="create-campaign" type="button">
+                Add campaign
+              </button>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Campaign</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Demo reward</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="campaign-rows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-panel" id="activity">
+            <div class="admin-section-heading">
+              <div>
+                <p class="eyebrow">LOCAL BROWSER DATA</p>
+                <h2>Recent activity</h2>
+              </div>
+              <span class="admin-local-label">Demo only</span>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Campaign</th>
+                    <th scope="col">Category</th>
+                    <th scope="col">Demo reward</th>
+                    <th scope="col">Completed</th>
+                  </tr>
+                </thead>
+                <tbody id="activity-rows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="admin-panel" id="users">
+            <div class="admin-section-heading">
+              <div>
+                <p class="eyebrow">CURRENT BROWSER</p>
+                <h2>Local profile</h2>
+              </div>
+              <span class="admin-local-label">Not an account</span>
+            </div>
+            <p class="admin-help">
+              This edits the profile saved on this device. It does not create
+              or manage real user accounts.
+            </p>
+            <form class="admin-form admin-profile-form" id="profile-form">
+              <label>
+                Display name
+                <input
+                  id="admin-profile-name"
+                  name="displayName"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="name"
+                  required
+                />
+              </label>
+              <label>
+                Email address
+                <input
+                  id="admin-profile-email"
+                  name="email"
+                  type="email"
+                  maxlength="254"
+                  autocomplete="email"
+                  placeholder="you@example.com"
+                />
+              </label>
+              <button class="primary-button" type="submit">Save profile</button>
+            </form>
+            <p class="admin-status" id="profile-status" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="admin-panel" id="settings">
+            <div class="admin-section-heading">
+              <div>
+                <p class="eyebrow">PREFERENCES</p>
+                <h2>Settings</h2>
+              </div>
+            </div>
+            <form class="admin-form admin-settings-form" id="theme-form">
+              <label for="admin-theme">Default theme for this browser</label>
+              <div class="admin-inline-form">
+                <select id="admin-theme" name="theme">
+                  <option value="light">Warm cream</option>
+                  <option value="dark">Dark green</option>
+                </select>
+                <button class="primary-button" type="submit">Save theme</button>
+              </div>
+            </form>
+            <p class="admin-status" id="settings-status" role="status" aria-live="polite"></p>
+            <div class="admin-reset-actions">
+              <div>
+                <strong>Reset demo activity</strong>
+                <p>Clear viewed campaigns and demo rewards on this browser.</p>
+              </div>
+              <button class="admin-danger-button" id="reset-progress" type="button">
+                Reset progress
+              </button>
+            </div>
+            <div class="admin-reset-actions">
+              <div>
+                <strong>Restore built-in campaigns</strong>
+                <p>Remove campaign edits and campaigns added in this browser.</p>
+              </div>
+              <button class="admin-secondary-button" id="restore-campaigns" type="button">
+                Restore defaults
+              </button>
+            </div>
+          </section>
+          <p class="admin-status" id="admin-status" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <a class="brand footer-brand" href="index.html">
+        <span class="brand-mark">k</span> kadenoh<span class="brand-period"
+          >.</span
+        >
+      </a>
+      <span>Local administration preview.</span>
+      <span>© 2026 Kadenoh demo</span>
+    </footer>
+
+    <dialog class="admin-dialog" id="campaign-dialog" aria-labelledby="campaign-dialog-title">
+      <button
+        class="dialog-close"
+        id="close-campaign-dialog"
+        type="button"
+        aria-label="Close campaign editor"
+      >
+        ×
+      </button>
+      <h2 id="campaign-dialog-title">Add campaign</h2>
+      <p class="admin-help">Campaigns are saved only in this browser.</p>
+      <form class="admin-form" id="campaign-form">
+        <input id="campaign-id" name="id" type="hidden" />
+        <label>
+          Campaign title
+          <input id="campaign-title" name="title" type="text" maxlength="80" required />
+        </label>
+        <div class="admin-form-row">
+          <label>
+            Category
+            <select id="campaign-category" name="category" required></select>
+          </label>
+          <label>
+            Card tag
+            <input id="campaign-tag" name="tag" type="text" maxlength="30" required />
+          </label>
+        </div>
+        <div class="admin-form-row">
+          <label>
+            Demo reward ($)
+            <input
+              id="campaign-reward"
+              name="reward"
+              type="number"
+              min="0"
+              max="1000"
+              step="0.01"
+              required
+            />
+          </label>
+          <label>
+            Preview length (seconds)
+            <input
+              id="campaign-duration"
+              name="duration"
+              type="number"
+              min="1"
+              max="60"
+              step="1"
+              required
+            />
+          </label>
+        </div>
+        <label>
+          Emoji
+          <input id="campaign-emoji" name="emoji" type="text" maxlength="12" required />
+        </label>
+        <label>
+          Image path
+          <input
+            id="campaign-image"
+            name="image"
+            type="text"
+            maxlength="160"
+            pattern="assets/[A-Za-z0-9._/-]+"
+            title="Use a path to an image inside the assets folder."
+            placeholder="assets/campaign-coffee.jpg"
+            required
+          />
+        </label>
+        <p class="admin-field-help">Use a local image path beginning with <code>assets/</code>.</p>
+        <label>
+          Description
+          <textarea id="campaign-description" name="description" rows="3" maxlength="240" required></textarea>
+        </label>
+        <div class="admin-dialog-actions">
+          <button class="admin-secondary-button" id="cancel-campaign" type="button">
+            Cancel
+          </button>
+          <button class="primary-button" type="submit">Save campaign</button>
+        </div>
+        <p class="admin-status" id="campaign-form-status" role="status" aria-live="polite"></p>
+      </form>
+    </dialog>
+  </body>
+</html>

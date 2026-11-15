@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4efe6" />
+    <meta
+      name="description"
+      content="Explore a simulated sponsored social feed. Likes and comments stay in this demo."
+    />
+    <title>Kadenoh — Social feed demo</title>
+    <script>
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("kadenoh-theme") === "dark" ? "dark" : "light";
+      } catch (error) {
+        console.warn("Could not load the saved color theme.", error);
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="campaign-data.js" defer></script>
+    <script src="social-demo.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html" aria-label="Kadenoh home">
+        <span class="brand-mark">k</span> kadenoh<span class="brand-period"
+          >.</span
+        >
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a class="nav-link" href="index.html">Dashboard</a>
+        <a class="nav-link" href="index.html#campaigns">Discover</a>
+        <a class="nav-link active" href="social-demo.html" aria-current="page"
+          >Social demo</a
+        >
+      </nav>
+      <button
+        class="theme-toggle"
+        id="theme-toggle"
+        type="button"
+        aria-label="Switch to dark theme"
+        title="Switch to dark theme"
+      >
+        <span aria-hidden="true">☾</span>
+      </button>
+    </header>
+
+    <main class="social-main">
+      <section class="social-hero" aria-labelledby="social-title">
+        <div>
+          <p class="eyebrow"><span class="live-dot"></span> SOCIAL CAMPAIGN PREVIEW</p>
+          <h1 id="social-title">A feed made for <span>good discovery.</span></h1>
+          <p class="welcome-copy">
+            Explore sample sponsored posts and try a few interactions.
+          </p>
+        </div>
+        <span class="demo-tag">DEMO ONLY</span>
+      </section>
+
+      <div class="social-layout">
+        <section class="social-feed" id="social-feed" aria-label="Demo social feed">
+          <article class="social-post">
+            <header class="social-post-header">
+              <span class="social-avatar coffee-avatar" aria-hidden="true">G</span>
+              <div class="social-account">
+                <strong>Good Day Coffee</strong>
+                <span>Sponsored · 2 min ago</span>
+              </div>
+              <span class="social-post-tag">DEMO SPONSORED</span>
+            </header>
+            <p class="social-post-copy">
+              A little ritual can make the whole morning feel brighter. How do
+              you take your first coffee?
+            </p>
+            <img
+              class="social-post-image"
+              src="assets/campaign-coffee.jpg"
+              alt="Friends sharing coffee at a cafe"
+              width="960"
+              height="640"
+            />
+            <div class="social-post-stats">
+              <span><span aria-hidden="true">♥</span> <span data-like-count>28</span> sample likes</span>
+              <span data-comment-count>3 demo comments</span>
+            </div>
+            <div class="social-actions">
+              <button class="social-action" type="button" data-action="like" aria-pressed="false">
+                <span aria-hidden="true">♡</span> Like
+              </button>
+              <button class="social-action" type="button" data-action="focus-comment">
+                <span aria-hidden="true">▢</span> Comment
+              </button>
+              <button class="social-action" type="button" data-action="save" aria-pressed="false">
+                <span aria-hidden="true">♧</span> Save
+              </button>
+            </div>
+            <div class="social-comments" aria-label="Comments">
+              <p><strong>Maya</strong> A slow morning is the best kind.</p>
+              <form class="social-comment-form">
+                <label class="sr-only" for="comment-coffee">Add a demo comment</label>
+                <input
+                  id="comment-coffee"
+                  name="comment"
+                  type="text"
+                  maxlength="160"
+                  placeholder="Add a demo comment…"
+                  required
+                />
+                <button class="primary-button" type="submit">Post</button>
+              </form>
+            </div>
+          </article>
+
+          <article class="social-post">
+            <header class="social-post-header">
+              <span class="social-avatar move-avatar" aria-hidden="true">M</span>
+              <div class="social-account">
+                <strong>Move Easy</strong>
+                <span>Sponsored · 15 min ago</span>
+              </div>
+              <span class="social-post-tag">DEMO SPONSORED</span>
+            </header>
+            <p class="social-post-copy">
+              Small steps can make an everyday routine feel lighter. What gets
+              you moving?
+            </p>
+            <img
+              class="social-post-image"
+              src="assets/campaign-wellness.jpg"
+              alt="Running shoe against a bright red background"
+              width="960"
+              height="640"
+              loading="lazy"
+            />
+            <div class="social-post-stats">
+              <span><span aria-hidden="true">♥</span> <span data-like-count>16</span> sample likes</span>
+              <span data-comment-count>1 demo comment</span>
+            </div>
+            <div class="social-actions">
+              <button class="social-action" type="button" data-action="like" aria-pressed="false">
+                <span aria-hidden="true">♡</span> Like
+              </button>
+              <button class="social-action" type="button" data-action="focus-comment">
+                <span aria-hidden="true">▢</span> Comment
+              </button>
+              <button class="social-action" type="button" data-action="save" aria-pressed="false">
+                <span aria-hidden="true">♧</span> Save
+              </button>
+            </div>
+            <div class="social-comments" aria-label="Comments">
+              <form class="social-comment-form">
+                <label class="sr-only" for="comment-move">Add a demo comment</label>
+                <input
+                  id="comment-move"
+                  name="comment"
+                  type="text"
+                  maxlength="160"
+                  placeholder="Add a demo comment…"
+                  required
+                />
+                <button class="primary-button" type="submit">Post</button>
+              </form>
+            </div>
+          </article>
+
+          <article class="social-post">
+            <header class="social-post-header">
+              <span class="social-avatar sound-avatar" aria-hidden="true">S</span>
+              <div class="social-account">
+                <strong>Sound Space</strong>
+                <span>Sponsored · 1 hr ago</span>
+              </div>
+              <span class="social-post-tag">DEMO SPONSORED</span>
+            </header>
+            <p class="social-post-copy">
+              Find a little quiet when your day gets noisy. What’s on your
+              favorite focus playlist?
+            </p>
+            <img
+              class="social-post-image"
+              src="assets/campaign-audio.jpg"
+              alt="Black headphones on a yellow background"
+              width="960"
+              height="640"
+              loading="lazy"
+            />
+            <div class="social-post-stats">
+              <span><span aria-hidden="true">♥</span> <span data-like-count>54</span> sample likes</span>
+              <span data-comment-count>8 demo comments</span>
+            </div>
+            <div class="social-actions">
+              <button class="social-action" type="button" data-action="like" aria-pressed="false">
+                <span aria-hidden="true">♡</span> Like
+              </button>
+              <button class="social-action" type="button" data-action="focus-comment">
+                <span aria-hidden="true">▢</span> Comment
+              </button>
+              <button class="social-action" type="button" data-action="save" aria-pressed="false">
+                <span aria-hidden="true">♧</span> Save
+              </button>
+            </div>
+            <div class="social-comments" aria-label="Comments">
+              <form class="social-comment-form">
+                <label class="sr-only" for="comment-sound">Add a demo comment</label>
+                <input
+                  id="comment-sound"
+                  name="comment"
+                  type="text"
+                  maxlength="160"
+                  placeholder="Add a demo comment…"
+                  required
+                />
+                <button class="primary-button" type="submit">Post</button>
+              </form>
+            </div>
+          </article>
+        </section>
+
+        <aside class="social-sidebar">
+          <section class="social-summary" aria-labelledby="summary-title">
+            <p class="eyebrow">THIS SESSION</p>
+            <h2 id="summary-title">Your demo activity</h2>
+            <p class="social-summary-count"><span id="interaction-count">0</span> interactions</p>
+            <div class="social-summary-row"><span>Likes</span><strong id="likes-count">0</strong></div>
+            <div class="social-summary-row"><span>Comments</span><strong id="comments-count">0</strong></div>
+            <div class="social-summary-row"><span>Saved posts</span><strong id="saves-count">0</strong></div>
+            <a class="social-dashboard-link" href="index.html#campaigns">
+              Back to campaigns <span aria-hidden="true">→</span>
+            </a>
+          </section>
+          <section class="social-demo-note" id="about-social-demo">
+            <span class="notice-icon" aria-hidden="true">i</span>
+            <div>
+              <strong>Just a preview</strong>
+              <p>
+                These brands, posts, sample counts, likes, and comments are
+                fictional. Nothing is published or sent to a social network,
+                and no rewards are earned here.
+              </p>
+            </div>
+          </section>
+        </aside>
+      </div>
+      <p class="social-status" id="social-status" role="status" aria-live="polite"></p>
+    </main>
+
+    <footer>
+      <a class="brand footer-brand" href="index.html">
+        <span class="brand-mark">k</span> kadenoh<span class="brand-period"
+          >.</span
+        >
+      </a>
+      <span>A sample feed, made for exploration.</span>
+      <span>© 2026 Kadenoh demo</span>
+      <a href="admin.html">Admin preview</a>
+    </footer>
+  </body>
+</html>
