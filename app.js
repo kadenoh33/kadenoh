@@ -658,6 +658,7 @@ window.addEventListener("storage", (event) => {
     applyTheme(event.newValue === "dark" ? "dark" : "light");
   }
 });
+window.addEventListener("kadenoh:profile-updated", loadProfileInformation);
 applyTheme(document.documentElement.dataset.theme);
 document.querySelector("#today-label").textContent = new Intl.DateTimeFormat("en", { weekday: "short", month: "short", day: "numeric" }).format(new Date());
 

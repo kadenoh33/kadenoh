@@ -5,6 +5,7 @@
     profile: "kadenoh-profile-information-v1",
     profileImage: "perkly-profile-image-v1",
     theme: "kadenoh-theme",
+    auth: "kadenoh-demo-session-v1",
   });
   const defaultCampaigns = [
     { id: "morning-brew", title: "A brighter morning brew", category: "Food", tag: "FOOD & DRINK", emoji: "☕", image: "assets/campaign-coffee.jpg", reward: 0.12, duration: 8, description: "Meet a smoother start to your morning with this quick introduction to Good Day Coffee.", colors: ["#e8ddd0", "#f2eadc"] },

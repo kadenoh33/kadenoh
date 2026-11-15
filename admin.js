@@ -329,6 +329,7 @@ document.querySelector("#profile-form").addEventListener("submit", (event) => {
       displayName,
       email,
     }));
+    window.dispatchEvent(new Event("kadenoh:profile-updated"));
     setStatus("#profile-status", "Local profile saved in this browser.");
   } catch (error) {
     console.warn("Could not save the local profile.", error);
@@ -407,6 +408,7 @@ function loadProfileForm() {
 }
 
 loadProfileForm();
+window.addEventListener("kadenoh:profile-updated", loadProfileForm);
 applyTheme(document.documentElement.dataset.theme);
 renderAll();
 

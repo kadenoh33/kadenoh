@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="style.css" />
     <script src="campaign-data.js" defer></script>
     <script src="app.js" defer></script>
+    <script src="auth-ui.js" defer></script>
   </head>
   <body>
     <header class="topbar">
@@ -51,7 +52,7 @@
       >
         <span aria-hidden="true">☾</span>
       </button>
-      <button class="profile-button" type="button" aria-label="Your profile">
+      <button class="profile-button" id="profile-button" type="button" aria-label="Your profile">
         <span class="profile-avatar"
           ><span id="profile-initial">DE</span
           ><img id="profile-image" alt="" hidden /></span
@@ -338,6 +339,12 @@
         Update your details and photo. They are stored only in this browser and
         are never uploaded.
       </p>
+      <div class="profile-session-state" id="profile-session-state" hidden>
+        <span>Signed in to this browser-only demo.</span>
+        <button class="profile-sign-out" id="profile-sign-out" type="button">
+          Sign out
+        </button>
+      </div>
       <div class="profile-photo-actions">
         <label class="photo-upload-button" for="profile-photo-input"
           >Choose photo</label

@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="admin.css" />
     <script src="campaign-data.js" defer></script>
     <script src="admin.js" defer></script>
+    <script src="auth-ui.js" defer></script>
   </head>
   <body>
     <header class="topbar">
@@ -66,8 +67,9 @@
       </section>
 
       <aside class="admin-notice">
-        <strong>Demo admin only.</strong> Changes are stored in this browser.
-        There is no sign-in, server database, or real user account management.
+        <strong>Demo admin only.</strong> Changes and demo sessions are stored
+        in this browser. Sign-in is not verified and does not secure this page;
+        there is no server database or real user account management.
       </aside>
 
       <div class="admin-layout">
@@ -313,7 +315,7 @@
             name="image"
             type="text"
             maxlength="160"
-            pattern="assets/[A-Za-z0-9._/-]+"
+            pattern="assets/.+"
             title="Use a path to an image inside the assets folder."
             placeholder="assets/campaign-coffee.jpg"
             required
