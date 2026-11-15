@@ -5,6 +5,7 @@ const storageKeys = demoStore.keys;
 const payoutMethods = demoStore.payoutMethods;
 const minimumWithdrawalAmount = demoStore.minimumWithdrawalAmount;
 const demoCreditAmount = demoStore.demoCreditAmount;
+const demoReserveMultiplier = demoStore.demoReserveMultiplier;
 const historyRows = document.querySelector("#history-rows");
 const withdrawalForm = document.querySelector("#withdrawal-form");
 const withdrawalAmount = document.querySelector("#withdrawal-amount");
@@ -27,6 +28,14 @@ function setStatus(message) {
 
 function formatCurrency(amount) {
   return `$${amount.toFixed(2)}`;
+}
+
+function calculateReserveAmount(amount) {
+  return Math.round(amount * demoReserveMultiplier * 100) / 100;
+}
+
+function calculateMaximumWithdrawal(balance) {
+  return Math.floor((balance * 100) / demoReserveMultiplier) / 100;
 }
 
 function applyTheme(theme) {
@@ -91,7 +100,7 @@ function renderSummary() {
   document.querySelector("#history-count").textContent = String(history.length);
   document.querySelector("#withdrawal-available").textContent = `Available: ${formatCurrency(balance)}`;
   withdrawalAmount.min = minimumWithdrawalAmount.toFixed(2);
-  withdrawalAmount.max = balance.toFixed(2);
+  withdrawalAmount.max = calculateMaximumWithdrawal(balance).toFixed(2);
 }
 
 function renderMethodOptions() {
@@ -111,20 +120,31 @@ function renderMethodOptions() {
   }
 
   const hasMethod = progress.methods.length > 0;
-  const enoughBalance = getAvailableBalance() >= minimumWithdrawalAmount;
+  const balance = getAvailableBalance();
+  const minimumReserveBalance = calculateReserveAmount(minimumWithdrawalAmount);
+  const enoughBalance = balance >= minimumReserveBalance;
   withdrawalMethod.disabled = !hasMethod || loadFailed;
   withdrawalAmount.disabled = !hasMethod || !enoughBalance || loadFailed;
   document.querySelector("#request-withdrawal").disabled = !hasMethod || !enoughBalance || loadFailed;
-  document.querySelector("#withdrawal-method-help").hidden = hasMethod;
+  const help = document.querySelector("#withdrawal-method-help");
+  help.hidden = loadFailed;
   if (!hasMethod) {
-    document.querySelector("#withdrawal-method-help").textContent =
-      `Add a demo payout provider on the dashboard. At least ${formatCurrency(minimumWithdrawalAmount)} must be available to request a withdrawal.`;
+    help.replaceChildren(document.createTextNode("Add a demo payout provider on the "));
+    const dashboardLink = document.createElement("a");
+    dashboardLink.href = "index.html#payout-title";
+    dashboardLink.textContent = "dashboard";
+    help.append(
+      dashboardLink,
+      document.createTextNode(
+        `. The $${minimumWithdrawalAmount.toFixed(2)} minimum requires at least ${formatCurrency(minimumReserveBalance)} in demo balance for the 3× check.`,
+      ),
+    );
   } else if (!enoughBalance) {
-    document.querySelector("#withdrawal-method-help").textContent =
-      `Earn at least ${formatCurrency(minimumWithdrawalAmount)} in demo rewards before requesting a withdrawal.`;
-    document.querySelector("#withdrawal-method-help").hidden = false;
+    help.textContent =
+      `The $${minimumWithdrawalAmount.toFixed(2)} minimum requires at least ${formatCurrency(minimumReserveBalance)} in demo balance for the 3× check.`;
   } else {
-    document.querySelector("#withdrawal-method-help").hidden = true;
+    help.textContent =
+      `The 3× check supports a maximum demo withdrawal of ${formatCurrency(calculateMaximumWithdrawal(balance))}; no extra balance is held.`;
   }
 }
 
@@ -235,7 +255,9 @@ function renderPage() {
 function renderDemoCredit() {
   const alreadyUsed = history.some((event) => event.type === "demo_credit");
   demoCreditPanel.hidden =
-    loadFailed || alreadyUsed || getAvailableBalance() >= minimumWithdrawalAmount;
+    loadFailed ||
+    alreadyUsed ||
+    getAvailableBalance() >= calculateReserveAmount(minimumWithdrawalAmount);
 }
 
 withdrawalAmount.addEventListener("input", () => withdrawalAmount.setCustomValidity(""));
@@ -275,9 +297,17 @@ withdrawalForm.addEventListener("submit", (event) => {
   const amount = Math.round(Number(withdrawalAmount.value) * 100) / 100;
   const methodId = withdrawalMethod.value;
   const available = getAvailableBalance();
-  if (!Number.isFinite(amount) || amount < minimumWithdrawalAmount || amount > available) {
+  if (!Number.isFinite(amount)) {
+    withdrawalAmount.setCustomValidity("Enter a valid withdrawal amount.");
+    withdrawalAmount.reportValidity();
+    return;
+  }
+  const requiredReserve = calculateReserveAmount(amount);
+  if (amount < minimumWithdrawalAmount || requiredReserve > available) {
     withdrawalAmount.setCustomValidity(
-      `Enter an amount between ${formatCurrency(minimumWithdrawalAmount)} and ${formatCurrency(available)}.`,
+      amount < minimumWithdrawalAmount
+        ? `The minimum demo withdrawal is ${formatCurrency(minimumWithdrawalAmount)}.`
+        : `The 3× check requires ${formatCurrency(requiredReserve)} in demo balance; ${formatCurrency(available)} is available.`,
     );
     withdrawalAmount.reportValidity();
     return;
@@ -291,6 +321,7 @@ withdrawalForm.addEventListener("submit", (event) => {
   pendingWithdrawal = { amount, methodId };
   confirmationStatus.textContent = "";
   document.querySelector("#withdrawal-review-amount").textContent = formatCurrency(amount);
+  document.querySelector("#withdrawal-review-reserve").textContent = formatCurrency(requiredReserve);
   document.querySelector("#withdrawal-review-method").textContent =
     payoutMethods.find((method) => method.id === methodId).name;
   document.querySelector("#withdrawal-review-remaining").textContent =
@@ -314,9 +345,10 @@ document.querySelector("#confirm-withdrawal").addEventListener("click", () => {
 
   const { amount, methodId } = pendingWithdrawal;
   const available = getAvailableBalance();
+  const requiredReserve = calculateReserveAmount(amount);
   if (
     amount < minimumWithdrawalAmount ||
-    amount > available ||
+    requiredReserve > available ||
     !progress.methods.includes(methodId) ||
     loadFailed
   ) {
@@ -324,8 +356,8 @@ document.querySelector("#confirm-withdrawal").addEventListener("click", () => {
     setStatus(
       amount < minimumWithdrawalAmount
         ? `The minimum demo withdrawal is ${formatCurrency(minimumWithdrawalAmount)}.`
-        : amount > available
-          ? "Your demo balance changed. Review the amount and try again."
+        : requiredReserve > available
+          ? "Your demo balance no longer meets the 3× check. Review the amount and try again."
           : "That payout provider is no longer available. Choose another provider and try again.",
     );
     renderPage();
@@ -337,6 +369,7 @@ document.querySelector("#confirm-withdrawal").addEventListener("click", () => {
     id: `withdrawal-${createdAt}-${history.length}`,
     type: "withdrawal",
     amount,
+    reserveAmount: requiredReserve,
     methodId,
     createdAt,
     status: "Requested (demo)",
@@ -353,7 +386,7 @@ document.querySelector("#confirm-withdrawal").addEventListener("click", () => {
     withdrawalConfirmation.close();
     withdrawalForm.reset();
     renderPage();
-    setStatus("Demo request recorded and balance reserved. No money was transferred.");
+    setStatus("Demo request recorded after the 3× balance check. No deposit or payout was made.");
   } catch (error) {
     console.warn("Could not save the demo withdrawal request.", error);
     confirmationStatus.textContent = "Could not save the request. Check browser storage and try again.";

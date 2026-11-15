@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f4efe6" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" sizes="any" />
     <meta
       name="description"
       content="Review your Kadenoh demo rewards, withdrawals, and account activity."
@@ -69,7 +70,8 @@
 
       <aside class="history-notice">
         <strong>Demo history only.</strong> Entries are stored in this browser.
-        No money is transferred; a demo withdrawal only reserves demo rewards.
+        No real money is transferred; a demo request deducts only the requested
+        amount from the displayed demo balance.
       </aside>
 
       <section class="history-summary" aria-label="History totals">
@@ -78,7 +80,7 @@
           <strong id="history-balance">$0.00</strong>
         </article>
         <article class="history-stat">
-          <span>Total demo rewards</span>
+          <span>Earned rewards</span>
           <strong id="history-earned">$0.00</strong>
         </article>
         <article class="history-stat">
@@ -102,8 +104,9 @@
           </span>
         </div>
         <p class="history-help">
-          Minimum withdrawal: $15.00. Review your request before confirming.
-          The amount is reserved from your demo balance; no payout is sent.
+          Minimum withdrawal: $1.00. Your available demo balance must be at
+          least 3× the request. This is a local balance check, not a deposit;
+          no money is collected or transferred.
         </p>
         <form class="withdrawal-form" id="withdrawal-form">
           <label for="withdrawal-amount">
@@ -112,11 +115,11 @@
               id="withdrawal-amount"
               name="amount"
               type="number"
-              min="15.00"
+              min="1.00"
               step="0.01"
               required
               inputmode="decimal"
-              placeholder="15.00"
+              placeholder="1.00"
             />
           </label>
           <label for="withdrawal-method">
@@ -159,6 +162,10 @@
             <dd id="withdrawal-review-amount">$0.00</dd>
           </div>
           <div>
+            <dt>Required demo balance (3× check)</dt>
+            <dd id="withdrawal-review-reserve">$3.00</dd>
+          </div>
+          <div>
             <dt>Provider</dt>
             <dd id="withdrawal-review-method">—</dd>
           </div>
@@ -168,8 +175,8 @@
           </div>
         </dl>
         <p class="withdrawal-confirmation-note" id="withdrawal-confirmation-note">
-          This records a demo request and reserves demo rewards in this browser.
-          No money or account details are sent.
+          The 3× requirement is checked against your existing demo balance.
+          Nothing is deposited or held, and no money or account details are sent.
         </p>
         <p class="withdrawal-confirmation-status" id="withdrawal-confirmation-status" role="status" aria-live="polite"></p>
         <div class="withdrawal-dialog-actions">

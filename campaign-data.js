@@ -12,8 +12,9 @@
     { id: "wise", name: "Wise", mark: "W" },
     { id: "binance", name: "Binance", mark: "B" },
   ];
-  const minimumWithdrawalAmount = 15;
-  const demoCreditAmount = minimumWithdrawalAmount;
+  const minimumWithdrawalAmount = 1;
+  const demoCreditAmount = 15;
+  const demoReserveMultiplier = 3;
   const defaultCampaigns = [
     { id: "morning-brew", title: "A brighter morning brew", category: "Food", tag: "FOOD & DRINK", emoji: "☕", image: "assets/campaign-coffee.jpg", reward: 0.12, duration: 8, description: "Meet a smoother start to your morning with this quick introduction to Good Day Coffee.", colors: ["#e8ddd0", "#f2eadc"] },
     { id: "move-easy", title: "Move a little easier", category: "Lifestyle", tag: "WELLNESS", emoji: "👟", image: "assets/campaign-wellness.jpg", reward: 0.18, duration: 10, description: "Take a look at everyday essentials designed to make moving feel a little more comfortable.", colors: ["#dce9df", "#eaf0e8"] },
@@ -108,8 +109,10 @@
         event.status === "Completed";
     }
     if (event.type === "withdrawal") {
+      const reserveAmount = Math.round(event.amount * demoReserveMultiplier * 100) / 100;
       return payoutMethods.some((method) => method.id === event.methodId) &&
         Number.isFinite(event.amount) && event.amount > 0 && event.amount <= 1000 &&
+        (event.reserveAmount === undefined || event.reserveAmount === reserveAmount) &&
         event.status === "Requested (demo)";
     }
     if (event.type === "demo_credit") {
@@ -187,6 +190,7 @@
     payoutMethods,
     minimumWithdrawalAmount,
     demoCreditAmount,
+    demoReserveMultiplier,
     defaultCampaigns: () => cloneCampaigns(defaultCampaigns),
     isValidCampaign,
     loadCampaigns,
